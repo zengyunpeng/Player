@@ -3,6 +3,7 @@
 //
 #include <cstring>
 #include <pthread.h>
+#include <chrono>
 #include "DNFFmpeg.h"
 #include "macro.h"
 
@@ -24,6 +25,8 @@ DNFFmpeg::DNFFmpeg(JavaCallHelper *callHelper, const char *datasource) {
 DNFFmpeg::~DNFFmpeg() {
     DELETE(datasource);
     DELETE(callHelper);
+    DELETE(audioChannel);
+    DELETE(videoChannel);
     datasource = 0;
 
 }
@@ -41,10 +44,16 @@ void DNFFmpeg::prepare() {
 void DNFFmpeg::_prepare() {
     //打开网络
     avformat_network_init();
-    avFormatContext = 0;
+    //代表一个视频/音频包含了视频,音频的各种信息
+    avFormatContext = avformat_alloc_context();
+    AVDictionary *opts = NULL;
+    //设置5秒超时
+    av_dict_set(&opts, "timeout", "5000000", 0);
+
     //双重指针的意义在于可以更改指针的指向
     //1.打开音视频
-    int ret = avformat_open_input(&avFormatContext, datasource, 0, 0);
+    int ret = avformat_open_input(&avFormatContext, datasource, NULL, &opts);
+    LOGE("%s open %d  %s", datasource, ret, av_err2str(ret));
     //非0就是打开视频失败
 //    if (ret) {
     if (ret != 0) {
@@ -60,6 +69,8 @@ void DNFFmpeg::_prepare() {
         return;
     }
 
+    duration = avFormatContext->duration / 1000000;
+
     for (int i = 0; i < avFormatContext->nb_streams; i++) {
         //可能代表一个视频也可能代表一个音频
         AVStream *avStream = avFormatContext->streams[i];
@@ -69,17 +80,44 @@ void DNFFmpeg::_prepare() {
         //a.通过当前流使用的编码方式查找解码器
         AVCodec *avCodec = avcodec_find_decoder(avCodecParameters->codec_id);
         //找不到解码器回调
-        if (avCodec == NULL) {
+        if (avCodec == nullptr) {
             callHelper->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
+            return;
         }
         //b.获得解码器上下文
-        
+        AVCodecContext *context = avcodec_alloc_context3(avCodec);
+        if (context == nullptr) {
+            callHelper->onError(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
+            return;
+        }
+        //c.配置参数
+        ret = avcodec_parameters_to_context(context, avCodecParameters);
+        if (ret < 0) {
+            callHelper->onError(THREAD_CHILD, FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL);
+            return;
+        }
+
+        if (avcodec_open2(context, avCodec, 0) != 0) {
+            callHelper->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
+        }
+        //时间基
+        AVRational base = avFormatContext->streams[i]->time_base;
+
 
         if (avCodecParameters->codec_type == AVMEDIA_TYPE_AUDIO) {
-
+            audioChannel = new AudioChannel;
         } else if (avCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
-
+            //视频的帧率
+            int fps = av_q2d(avFormatContext->streams[i]->avg_frame_rate);
+            videoChannel = new VideoChannel(i, context, base, fps);
         }
+
     }
+    //同时没有音频和视频,非媒体文件直接报错
+    if (audioChannel == nullptr && videoChannel == nullptr) {
+        callHelper->onError(THREAD_CHILD, FFMPEG_NOMEDIA);
+        return;
+    }
+
 
 }

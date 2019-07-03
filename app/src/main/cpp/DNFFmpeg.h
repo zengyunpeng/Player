@@ -7,6 +7,8 @@
 
 
 #include "JavaCallHelper.h"
+#include "AudioChannel.h"
+#include "VideoChannel.h"
 
 extern "C" {
 #include "include/libavformat/avformat.h"
@@ -27,6 +29,9 @@ private:
     pthread_t pid;
     AVFormatContext *avFormatContext;
     JavaCallHelper *callHelper;
+    AudioChannel *audioChannel;
+    VideoChannel *videoChannel;
+    int64_t duration;
 };
 
 
