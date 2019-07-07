@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.player"
-        minSdkVersion 21
+        minSdkVersion 21//出现该错误的原因，是因为上面shell脚本中，指定编译的头文件与库文件的查找目录都是21，这样编译出来的依赖库只能用在minSdkVersion 21的项目中，而我的项目最低是兼容到16，那就要重新修改了16。
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -28,6 +28,7 @@ android {
             version "3.10.2"
         }
     }
+
 }
 
 dependencies {

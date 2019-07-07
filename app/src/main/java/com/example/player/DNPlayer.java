@@ -13,7 +13,8 @@ public class DNPlayer implements SurfaceHolder.Callback {
 
     SurfaceHolder holder;
     private String datasource;
-    private MediaPlayer.OnPreparedListener onPreparedListener;
+    private OnPrepareListener listener;
+
 
     /**
      * 让使用设置播放的文件或者直播地址
@@ -41,7 +42,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
         holder.addCallback(this);
     }
 
-    public void prepare(String datasource) {
+    public void prepare() {
         native_prepare(datasource);
     }
 
@@ -65,6 +66,22 @@ public class DNPlayer implements SurfaceHolder.Callback {
     public void onError(int errorCode) {
         Log.i("tag", "Java接到回调 errorCode: " + errorCode);
     }
+
+    public void onPrepare() {
+        if (listener != null) {
+            listener.onPrepare();
+        }
+    }
+
+
+    public void setOnPreparedListener(OnPrepareListener l) {
+        this.listener = l;
+    }
+
+    public interface OnPrepareListener {
+        void onPrepare();
+    }
+
 
 //    public interface CallBack {
 //        void onError(int errorCode);

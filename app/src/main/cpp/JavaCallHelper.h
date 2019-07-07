@@ -19,11 +19,15 @@ public:
     //回调java
     void onError(int thread, int error);
 
+
+    void onPrepare(int thread);
+
 private:
     JavaVM *vm;
     JNIEnv *jnienv;
     jobject instance;
     jmethodID onErrorId;
+    jmethodID onPrepareId;
 };
 
 

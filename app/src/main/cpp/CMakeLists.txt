@@ -45,8 +45,9 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         native-lib
-
-        avcodec avfilter avformat avutil swresample swscale
+        #必须以这个顺序引入不然会报错
+        avfilter avformat avcodec   avutil swresample swscale
         # Links the target library to the log library
         # included in the NDK.
-        ${log-lib})
+        #导入log库和z库
+        ${log-lib} z)

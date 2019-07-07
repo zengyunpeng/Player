@@ -3,7 +3,6 @@
 //
 #include <cstring>
 #include <pthread.h>
-#include <chrono>
 #include "DNFFmpeg.h"
 #include "macro.h"
 
@@ -25,8 +24,13 @@ DNFFmpeg::DNFFmpeg(JavaCallHelper *callHelper, const char *datasource) {
 DNFFmpeg::~DNFFmpeg() {
     DELETE(datasource);
     DELETE(callHelper);
-    DELETE(audioChannel);
-    DELETE(videoChannel);
+    if (audioChannel == NULL) {
+        DELETE(audioChannel)
+    }
+    if (videoChannel == NULL) {
+        DELETE(videoChannel)
+    }
+
     datasource = 0;
 
 }
@@ -44,19 +48,14 @@ void DNFFmpeg::prepare() {
 void DNFFmpeg::_prepare() {
     //打开网络
     avformat_network_init();
-    //代表一个视频/音频包含了视频,音频的各种信息
-    avFormatContext = avformat_alloc_context();
-    AVDictionary *opts = NULL;
-    //设置5秒超时
-    av_dict_set(&opts, "timeout", "5000000", 0);
-
+    avFormatContext = 0;
     //双重指针的意义在于可以更改指针的指向
     //1.打开音视频
-    int ret = avformat_open_input(&avFormatContext, datasource, NULL, &opts);
-    LOGE("%s open %d  %s", datasource, ret, av_err2str(ret));
+    int ret = avformat_open_input(&avFormatContext, datasource, 0, 0);
     //非0就是打开视频失败
 //    if (ret) {
     if (ret != 0) {
+        LOGE("打开媒体失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL);
         return;
     }
@@ -65,59 +64,65 @@ void DNFFmpeg::_prepare() {
     ret = avformat_find_stream_info(avFormatContext, 0);
     //非0则说明查找失败
     if (ret < 0) {
+        LOGE("查找流失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
         return;
     }
 
-    duration = avFormatContext->duration / 1000000;
-
     for (int i = 0; i < avFormatContext->nb_streams; i++) {
         //可能代表一个视频也可能代表一个音频
-        AVStream *avStream = avFormatContext->streams[i];
+        AVStream *stream = avFormatContext->streams[i];
         //包含了解码这段视频流的各种参数信息
-        AVCodecParameters *avCodecParameters = avStream->codecpar;
+        AVCodecParameters *codecpar = stream->codecpar;
         //无论视频还是音频都需要干的一些事情（获得解码器）
         //a.通过当前流使用的编码方式查找解码器
-        AVCodec *avCodec = avcodec_find_decoder(avCodecParameters->codec_id);
+        AVCodec *codec = avcodec_find_decoder(codecpar->codec_id);
         //找不到解码器回调
-        if (avCodec == nullptr) {
+        if (codec == NULL) {
+            LOGE("查找解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_FIND_DECODER_FAIL);
-            return;
         }
         //b.获得解码器上下文
-        AVCodecContext *context = avcodec_alloc_context3(avCodec);
-        if (context == nullptr) {
+        AVCodecContext *context = avcodec_alloc_context3(codec);
+        if (context == NULL) {
+            LOGE("创建解码上下文失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_ALLOC_CODEC_CONTEXT_FAIL);
             return;
         }
-        //c.配置参数
-        ret = avcodec_parameters_to_context(context, avCodecParameters);
+        //c.设置上下文的一些参数
+        ret = avcodec_parameters_to_context(context, codecpar);
         if (ret < 0) {
+            LOGE("设置解码上下文参数失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL);
-            return;
         }
 
-        if (avcodec_open2(context, avCodec, 0) != 0) {
+        //d.打开编码器
+        ret = avcodec_open2(context, codec, 0);
+        if (ret < 0) {
+            LOGE("打开解码器失败:%s", av_err2str(ret));
             callHelper->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
         }
-        //时间基
-        AVRational base = avFormatContext->streams[i]->time_base;
 
+        //4.打开编码器
+        ret = avcodec_open2(context, codec, 0);
 
-        if (avCodecParameters->codec_type == AVMEDIA_TYPE_AUDIO) {
+        if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
             audioChannel = new AudioChannel;
-        } else if (avCodecParameters->codec_type == AVMEDIA_TYPE_VIDEO) {
-            //视频的帧率
-            int fps = av_q2d(avFormatContext->streams[i]->avg_frame_rate);
-            videoChannel = new VideoChannel(i, context, base, fps);
+        } else if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            videoChannel = new VideoChannel;
         }
-
     }
-    //同时没有音频和视频,非媒体文件直接报错
-    if (audioChannel == nullptr && videoChannel == nullptr) {
+
+    //不是媒体文件(很少见)
+    if (audioChannel == NULL && videoChannel == NULL) {
+        LOGE("打开解码器失败:%s", 1);
         callHelper->onError(THREAD_CHILD, FFMPEG_NOMEDIA);
-        return;
     }
 
+    //准备完了，通知java
+
+
+
+    callHelper->onPrepare(THREAD_CHILD);
 
 }

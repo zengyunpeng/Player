@@ -31,7 +31,6 @@ private:
     JavaCallHelper *callHelper;
     AudioChannel *audioChannel;
     VideoChannel *videoChannel;
-    int64_t duration;
 };
 
 
