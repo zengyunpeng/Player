@@ -10,14 +10,14 @@ extern "C" {
 }
 
 void *decode_task(void *args) {
-    LOGE("开始进行视频的解码%s","");
+    LOGE("开始进行视频的解码%s", "");
     VideoChannel *channel = static_cast<VideoChannel *>(args);
     channel->decode();
     return 0;
 }
 
 void *render_task(void *args) {
-    LOGE("开始进行视频的渲染%s","");
+    LOGE("开始进行视频的渲染%s", "");
     VideoChannel *channel = static_cast<VideoChannel *>(args);
     channel->render();
     return 0;
@@ -78,6 +78,7 @@ void VideoChannel::decode() {
  */
 void VideoChannel::render() {
     //前三个参数原图的 后三个目标的属性,后面的编解码的属性
+    LOGE("void VideoChannel::render() {%s", "");
     SwsContext *swsContext = sws_getContext(
             context->width, context->height, context->pix_fmt,
             context->width, context->height, AV_PIX_FMT_RGBA,
@@ -89,20 +90,25 @@ void VideoChannel::render() {
     //申请内存空间
     av_image_alloc(dst, dstStride,
                    context->width, context->height, AV_PIX_FMT_RGBA, 1);
-
+    LOGE("isPlaying: %d", isPlaying);
     while (isPlaying) {
+        LOGE("进入了渲染循环");
         int ret = avFrames.pop(avFrame);
+        LOGE("ret: %d", ret);
         if (!isPlaying) {
+            LOGE("break");
             break;
         }
-        sws_scale(swsContext, avFrame->data,
+        LOGE("sws_scale(swsContext 前面");
+        sws_scale(swsContext, reinterpret_cast<const uint8_t *const *>(avFrame->data),
                   avFrame->linesize, 0,
                   context->height,
                   dst,
                   dstStride);
         //回调出去播放
+        LOGE("回调给了java");
         callBack(dst[0], dstStride[0], context->width, context->height);
-        realseAvFrame(&avFrame);
+//        realseAvFrame(&avFrame);
     }
     av_free(&dst[0]);
     realseAvFrame(&avFrame);
