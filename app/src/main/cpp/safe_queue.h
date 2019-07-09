@@ -7,6 +7,7 @@
 
 #include <queue>
 #include <pthread.h>
+#include "macro.h"
 
 
 //todo 宏 开关 是否使用c++11,玩玩而已。还是习惯posix标准的线程。。。。
@@ -22,7 +23,7 @@ template<typename T>
 class SafeQueue {
     typedef void (*ReleaseCallback)(T *);
 
-    typedef void (*SyncHandle)(queue<T> &);
+    typedef void (*SyncHandle)(queue <T> &);
 
 public:
     SafeQueue() {
@@ -65,7 +66,7 @@ public:
     }
 
 
-    int pop(T& value) {
+    int pop(T &value) {
         int ret = 0;
 #ifdef C11
         //占用空间相对lock_guard 更大一点且相对更慢一点，但是配合条件必须使用它，更灵活
@@ -78,9 +79,14 @@ public:
             ret = 1;
         }
 #else
+        LOGE("pop方法体");
         pthread_mutex_lock(&mutex);
         //在多核处理器下 由于竞争可能虚假唤醒 包括jdk也说明了
+        LOGE("pop方法体 %d", work && q.empty());
+        LOGE("pop方法体 %d",  work);
+        LOGE("pop方法体 %d",  q.empty());
         while (work && q.empty()) {
+            LOGE("pthread_cond_wait");
             pthread_cond_wait(&cond, &mutex);
         }
         if (!q.empty()) {
@@ -167,7 +173,7 @@ private:
     pthread_mutex_t mutex;
 #endif
 
-    queue<T> q;
+    queue <T> q;
     //是否工作的标记 1 ：工作 0：不接受数据 不工作
     int work;
     ReleaseCallback releaseCallback;

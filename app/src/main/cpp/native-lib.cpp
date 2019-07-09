@@ -3,6 +3,7 @@
 #include "DNFFmpeg.h"
 //导入本地窗口
 #include <android/native_window_jni.h>
+#include <pthread.h>
 
 DNFFmpeg *dnFFmpeg = 0;
 
@@ -23,6 +24,7 @@ void render(uint8_t *data, int linesize, int width, int height) {
     if (ANativeWindow_lock(window, &window_buffer, 0)) {
         ANativeWindow_release(window);
         window = 0;
+        pthread_mutex_unlock(&mutex);
         return;
     }
     //拷贝数据

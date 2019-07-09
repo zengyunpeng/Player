@@ -2,6 +2,7 @@
 // Created by Administrator on 2019/7/2.
 //
 
+#include <pthread.h>
 #include "VideoChannel.h"
 #include "macro.h"
 
@@ -39,7 +40,7 @@ void VideoChannel::play() {
 
 
 void VideoChannel::decode() {
-    AVPacket *avPacket;
+    AVPacket *avPacket = 0;
     while (isPlaying) {
         int ret = packages.pop(avPacket);
         if (!isPlaying) {
@@ -52,11 +53,11 @@ void VideoChannel::decode() {
         ret = avcodec_send_packet(context, avPacket);
         realseAvPacket(&avPacket);
         if (ret != 0) {
-
             break;
         }
         //代表了一个图像
         AVFrame *frame = av_frame_alloc();
+        //从解码器中读取解码后的数据包
         ret = avcodec_receive_frame(context, frame);
         if (ret == AVERROR(EAGAIN)) {
             continue;
@@ -82,7 +83,7 @@ void VideoChannel::render() {
     SwsContext *swsContext = sws_getContext(
             context->width, context->height, context->pix_fmt,
             context->width, context->height, AV_PIX_FMT_RGBA,
-            SWS_BILINEAR, NULL, NULL, NULL);
+            SWS_BILINEAR, 0, 0, 0);
     AVFrame *avFrame = 0;
     //指针数组
     uint8_t *dst[4];
@@ -108,7 +109,7 @@ void VideoChannel::render() {
         //回调出去播放
         LOGE("回调给了java");
         callBack(dst[0], dstStride[0], context->width, context->height);
-//        realseAvFrame(&avFrame);
+        realseAvFrame(&avFrame);
     }
     av_free(&dst[0]);
     realseAvFrame(&avFrame);

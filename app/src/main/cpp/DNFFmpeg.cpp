@@ -117,7 +117,7 @@ void DNFFmpeg::_prepare() {
 
     //不是媒体文件(很少见)
     if (audioChannel == NULL && videoChannel == NULL) {
-        LOGE("打开解码器失败:%s", 1);
+        LOGE("打开解码器失败:%s", "1");
         callHelper->onError(THREAD_CHILD, FFMPEG_NOMEDIA);
     }
 

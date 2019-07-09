@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceView surfaceView = findViewById(R.id.surfaceView);
         dnPlayer = new DNPlayer();
         dnPlayer.setDataSource("rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov");
+//        dnPlayer.setDataSource("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
         dnPlayer.setSurfaceView(surfaceView);
 
         dnPlayer.setOnPreparedListener(new DNPlayer.OnPrepareListener() {
