@@ -25,7 +25,7 @@ public class DNPlayer implements SurfaceHolder.Callback {
 
 
     public void start() {
-
+        native_start();
     }
 
     public void stop() {
@@ -49,11 +49,13 @@ public class DNPlayer implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.i("tag", "surfaceCreated");
+
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.i("tag", "surfaceChanged");
+        native_setSurface(holder.getSurface());
     }
 
     @Override
@@ -67,6 +69,9 @@ public class DNPlayer implements SurfaceHolder.Callback {
         Log.i("tag", "Java接到回调 errorCode: " + errorCode);
     }
 
+    /**
+     * 给C代码层回调的方法
+     */
     public void onPrepare() {
         if (listener != null) {
             listener.onPrepare();
@@ -89,4 +94,8 @@ public class DNPlayer implements SurfaceHolder.Callback {
 
 
     native void native_prepare(String datasource);
+
+    native void native_start();
+
+    native void native_setSurface(Surface surface);
 }

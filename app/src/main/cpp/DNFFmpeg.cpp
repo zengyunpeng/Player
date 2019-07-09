@@ -14,7 +14,8 @@ void *task_prepare(void *args) {
 }
 
 DNFFmpeg::DNFFmpeg(JavaCallHelper *callHelper, const char *datasource) {
-    this->datasource = new char[strlen(datasource)];
+    //strlen获得字符串的长度不包括\0，所以要加上1
+    this->datasource = new char[strlen(datasource) + 1];
     //字符串拷贝,防止java中的datasource的内存被释放
     strcpy(this->datasource, datasource);
     this->callHelper = callHelper;
@@ -107,9 +108,10 @@ void DNFFmpeg::_prepare() {
         ret = avcodec_open2(context, codec, 0);
 
         if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioChannel = new AudioChannel;
+            audioChannel = new AudioChannel(i, context);
         } else if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoChannel = new VideoChannel;
+            videoChannel = new VideoChannel(i, context);
+            videoChannel->callBack = this->callBack;
         }
     }
 
@@ -120,9 +122,72 @@ void DNFFmpeg::_prepare() {
     }
 
     //准备完了，通知java
-
-
-
     callHelper->onPrepare(THREAD_CHILD);
 
+
+}
+
+void *play(void *args) {
+    LOGE("%s", "void *play(void *args) {");
+    DNFFmpeg *dnfFmpeg = static_cast<DNFFmpeg *>(args);
+    dnfFmpeg->_start();
+    //必须返回0
+    return 0;
+}
+
+void DNFFmpeg::start() {
+    //正在播放的标记
+    isPalying = 1;
+    if (videoChannel) {
+        LOGE("开始进行视频流的播放");
+        videoChannel->packages.setWork(1);
+        videoChannel->play();
+    }
+    pthread_create(&player_pid, 0, play, this);
+
+}
+
+/**
+ * 专门读取数据包
+ */
+void DNFFmpeg::_start() {
+    //正在播放的标记
+    LOGE("%s", "void DNFFmpeg::_start() {");
+    int ret;
+    if (isPalying) {
+        LOGE("%s", "正在读取视频流");
+        AVPacket *packet = av_packet_alloc();
+        ret = av_read_frame(avFormatContext, packet);
+        LOGE("%d", ret);
+        if (ret == 0) {
+            //stream_index这个流的一个序号
+            if (audioChannel && packet->stream_index == audioChannel->id) {
+                //音频
+                LOGE("%s", "读取到音频");
+
+            } else if (videoChannel && packet->stream_index == videoChannel->id) {
+                //视频
+                LOGE("%s", "读取到视频");
+                videoChannel->packages.push(packet);
+            }
+
+        } else if (ret == AVERROR_EOF) {
+            //读取完成，但是有可能还没播放完
+
+        } else {
+
+        }
+    }
+
+
+}
+
+void DNFFmpeg::setRenderFrameCallBack(RenderFrameCallBack callBack) {
+    this->callBack = callBack;
+//    if (videoChannel) {
+//        videoChannel->callBack = callBack;
+//    }
+//    if (audioChannel) {
+////        audioChannel
+//    }
 }

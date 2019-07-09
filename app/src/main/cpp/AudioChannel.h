@@ -5,9 +5,13 @@
 #ifndef PLAYER_AUDIOCHANNEL_H
 #define PLAYER_AUDIOCHANNEL_H
 
+#include "BaseChannel.h"
+class AudioChannel :public BaseChannel{
+public:
+    AudioChannel(int i,AVCodecContext *context);
 
-class AudioChannel {
-
+private:
+    void play();
 };
 
 

@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "可以开始播放了", Toast.LENGTH_LONG).show();
                     }
                 });
+                dnPlayer.start();
             }
         });
     }

@@ -24,13 +24,25 @@ public:
 
     void _prepare();
 
+    void start();
+
+    void _start();
+
+    void setRenderFrameCallBack(RenderFrameCallBack callBack);
+
 private:
-    char *datasource;
+    char *datasource = NULL;
     pthread_t pid;
-    AVFormatContext *avFormatContext;
-    JavaCallHelper *callHelper;
-    AudioChannel *audioChannel;
-    VideoChannel *videoChannel;
+    pthread_t player_pid;
+    AVFormatContext *avFormatContext = NULL;
+    JavaCallHelper *callHelper = NULL;
+    //申明一个指针一定要初始化，不然会有默认值
+    AudioChannel *audioChannel = NULL;
+    VideoChannel *videoChannel = NULL;
+    int isPalying = 0;
+    RenderFrameCallBack callBack;
+
+
 };
 
 

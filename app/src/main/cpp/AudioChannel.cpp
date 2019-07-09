@@ -3,3 +3,11 @@
 //
 
 #include "AudioChannel.h"
+
+AudioChannel::AudioChannel(int i, AVCodecContext *context) : BaseChannel(i, context) {
+}
+
+
+void AudioChannel::play() {
+
+};

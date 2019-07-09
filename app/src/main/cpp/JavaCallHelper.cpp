@@ -9,7 +9,7 @@ JavaCallHelper::JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject instance) {
     //在子线程中就要用到JavaVM
     this->vm = vm;
     //如果在子线程回调,用jnienv
-    this->jnienv = jnienv;
+    this->jnienv = env;
     //一旦涉及到jobject跨方法跨线程调用就需要创建全局引用
     this->instance = env->NewWeakGlobalRef(instance);
 
