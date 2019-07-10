@@ -154,7 +154,7 @@ void DNFFmpeg::_start() {
     //正在播放的标记
     LOGE("%s", "void DNFFmpeg::_start() {");
     int ret;
-    if (isPalying) {
+    while (isPalying) {
         LOGE("%s", "正在读取视频流");
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(avFormatContext, packet);
