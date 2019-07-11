@@ -107,7 +107,7 @@ void VideoChannel::render() {
                   dst,
                   dstStride);
         //回调出去播放
-        LOGE("回调给了java");
+        LOGE("回调给外界去渲染");
         callBack(dst[0], dstStride[0], context->width, context->height);
         realseAvFrame(&avFrame);
     }

@@ -50,4 +50,4 @@ target_link_libraries( # Specifies the target library.
         # Links the target library to the log library
         # included in the NDK.
         #导入log库和z库
-        ${log-lib} z android)
+        ${log-lib} z android OpenSLES)

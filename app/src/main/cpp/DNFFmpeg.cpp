@@ -141,7 +141,12 @@ void DNFFmpeg::start() {
     if (videoChannel) {
         LOGE("开始进行视频流的播放");
         videoChannel->packages.setWork(1);
+        videoChannel->avFrames.setWork(1);
         videoChannel->play();
+    }
+
+    if (audioChannel) {
+        audioChannel->play();
     }
     pthread_create(&player_pid, 0, play, this);
 
@@ -164,6 +169,8 @@ void DNFFmpeg::_start() {
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 //音频
                 LOGE("%s", "读取到音频");
+
+                audioChannel->packages.push(packet);
 
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 //视频

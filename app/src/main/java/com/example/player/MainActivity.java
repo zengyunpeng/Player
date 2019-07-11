@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.tencent.bugly.crashreport.CrashReport;
+
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CrashReport.initCrashReport(getApplicationContext(), "c52db585d0", true);
         setContentView(R.layout.activity_main);
 
         // Example of a call to a native method
@@ -50,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
      * which is packaged with this application.
      */
 
-    public void start(View view) {
+    public void start(View view) throws Exception {
+//        throw new Exception("hahahha");
+//        CrashReport.testJavaCrash();
         dnPlayer.prepare();
     }
 }
