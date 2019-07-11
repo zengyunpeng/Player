@@ -104,6 +104,7 @@ void VideoChannel::render() {
                   dst,
                   dstStride);
         //回调出去播放
+
         callBack(dst[0], dstStride[0], context->width, context->height);
         realseAvFrame(&avFrame);
     }
