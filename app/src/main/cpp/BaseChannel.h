@@ -17,18 +17,13 @@ extern "C" {
 class BaseChannel {
 public:
     BaseChannel(int id, AVCodecContext *context) : id(id), context(context) {
-
+        packages.setReleaseCallback(BaseChannel::realseAvPacket);
+        avFrames.setReleaseCallback(BaseChannel::realseAvFrame);
     };
 
     //申明virtual ,不声明会只调用父类不调用子类的析构方法
     virtual ~BaseChannel() {
-        packages.setReleaseCallback(BaseChannel::realseAvPacket);
-
         packages.clear();
-
-
-        avFrames.setReleaseCallback(BaseChannel::realseAvFrame);
-
         avFrames.clear();
 
     };

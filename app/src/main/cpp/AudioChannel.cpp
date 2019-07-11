@@ -39,7 +39,10 @@ AudioChannel::AudioChannel(int i, AVCodecContext *context) : BaseChannel(i, cont
 
 
 AudioChannel::~AudioChannel() {
-
+    if(data){
+        free(data);
+        data = 0;
+    }
 }
 
 
@@ -72,7 +75,7 @@ void AudioChannel::decode() {
         //把包丟給解碼器
         ret = avcodec_send_packet(context, packet);
         realseAvPacket(&packet);
-        if (!ret) {
+        if (ret!=0) {
             break;
         }
         //代表一个图像
@@ -117,13 +120,11 @@ void AudioChannel::_play() {
      * 2.设置混音器
      */
     //2.1 创建混音器
-    LOGE("2.1 创建混音器");
     result = (*engineInterface)->CreateOutputMix(engineInterface, &outputMixObject, 0,
                                                  0, 0);
     if (SL_RESULT_SUCCESS != result) {
         return;
     }
-    LOGE("2.1 初始化混音器");
     //2.2 初始化混音器
     result = (*outputMixObject)->Realize(outputMixObject, SL_BOOLEAN_FALSE);
     if (result != SL_RESULT_SUCCESS) {
@@ -135,7 +136,6 @@ void AudioChannel::_play() {
      */
     //3.1 配置输入声音信息
     //创建buffer缓冲类型的队列 2个队列
-    LOGE("3.1 配置输入声音信息");
     SLDataLocator_AndroidSimpleBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
                                                             2};
     //pcm数据格式
@@ -154,40 +154,32 @@ void AudioChannel::_play() {
     const SLInterfaceID ids[1] = {SL_IID_BUFFERQUEUE};
     const SLboolean req[1] = {SL_BOOLEAN_TRUE};
     //3.3创建播放器
-    LOGE("3.3创建播放器");
     (*engineInterface)->CreateAudioPlayer(engineInterface, &bqPlayerObject, &slDataSource,
                                           &audioSnk, 1,
                                           ids, req);
     //初始化播放器
-    LOGE("初始化播放器");
     (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
 
     //得到播放器后调用 获取player接口
-    LOGE("得到播放器后调用 获取player接口");
     (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_PLAY, &bqPlayerInterface);
 
     /**
      * 4. 设置播放回调函数
      */
     //获取播放器队列接口
-    LOGE("获取播放器队列接口");
     (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_BUFFERQUEUE,
                                     &bqPlayerBufferQueueInterface);
-    LOGE("设置播放器队列接口回调");
     //这里bqPlayerBufferQueueInterface为null
     (*bqPlayerBufferQueueInterface)->RegisterCallback(bqPlayerBufferQueueInterface,
                                                       bqPlayerCallback, this);
-    LOGE("设置播放器队列接口回调结束");
     /**
     * 5、设置播放状态
     */
-    LOGE("设置播放状态");
     (*bqPlayerInterface)->SetPlayState(bqPlayerInterface, SL_PLAYSTATE_PLAYING);
 
     /**
    * 6、手动激活一下这个回调
    */
-    LOGE("手动激活一下这个回调");
     bqPlayerCallback(bqPlayerBufferQueueInterface, this);
 
 }
