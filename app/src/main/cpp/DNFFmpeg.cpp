@@ -56,7 +56,6 @@ void DNFFmpeg::_prepare() {
     //非0就是打开视频失败
 //    if (ret) {
     if (ret != 0) {
-        LOGE("打开媒体失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_OPEN_URL);
         return;
     }
@@ -65,7 +64,6 @@ void DNFFmpeg::_prepare() {
     ret = avformat_find_stream_info(avFormatContext, 0);
     //非0则说明查找失败
     if (ret < 0) {
-        LOGE("查找流失败:%s", av_err2str(ret));
         callHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
         return;
     }
@@ -157,24 +155,19 @@ void DNFFmpeg::start() {
  */
 void DNFFmpeg::_start() {
     //正在播放的标记
-    LOGE("%s", "void DNFFmpeg::_start() {");
     int ret;
     while (isPalying) {
-        LOGE("%s", "正在读取视频流");
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(avFormatContext, packet);
-        LOGE("%d", ret);
         if (ret == 0) {
             //stream_index这个流的一个序号
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 //音频
-                LOGE("%s", "读取到音频");
 
                 audioChannel->packages.push(packet);
 
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 //视频
-                LOGE("%s", "读取到视频");
                 videoChannel->packages.push(packet);
             }
 

@@ -93,21 +93,17 @@ void VideoChannel::render() {
                    context->width, context->height, AV_PIX_FMT_RGBA, 1);
     LOGE("isPlaying: %d", isPlaying);
     while (isPlaying) {
-        LOGE("进入了渲染循环");
         int ret = avFrames.pop(avFrame);
-        LOGE("ret: %d", ret);
         if (!isPlaying) {
             LOGE("break");
             break;
         }
-        LOGE("sws_scale(swsContext 前面");
         sws_scale(swsContext, reinterpret_cast<const uint8_t *const *>(avFrame->data),
                   avFrame->linesize, 0,
                   context->height,
                   dst,
                   dstStride);
         //回调出去播放
-        LOGE("回调给外界去渲染");
         callBack(dst[0], dstStride[0], context->width, context->height);
         realseAvFrame(&avFrame);
     }
