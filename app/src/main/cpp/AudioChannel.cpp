@@ -185,7 +185,6 @@ void AudioChannel::_play() {
 }
 
 int AudioChannel::getPcm() {
-    LOGE("pcm()");
     int data_size = 0;
     AVFrame *frame;
     int ret = avFrames.pop(frame);
@@ -211,6 +210,5 @@ int AudioChannel::getPcm() {
                               frame->nb_samples);
 
     data_size = samples * out_samplesize * out_channels;
-    LOGE("data_size: %d", data_size);
     return data_size;
 };
