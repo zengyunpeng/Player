@@ -79,14 +79,9 @@ public:
             ret = 1;
         }
 #else
-        LOGE("pop方法体");
         pthread_mutex_lock(&mutex);
         //在多核处理器下 由于竞争可能虚假唤醒 包括jdk也说明了
-        LOGE("pop方法体 %d", work && q.empty());
-        LOGE("pop方法体 %d",  work);
-        LOGE("pop方法体 %d",  q.empty());
         while (work && q.empty()) {
-            LOGE("pthread_cond_wait");
             pthread_cond_wait(&cond, &mutex);
         }
         if (!q.empty()) {
