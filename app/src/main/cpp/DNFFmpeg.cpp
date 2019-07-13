@@ -104,11 +104,15 @@ void DNFFmpeg::_prepare() {
 
         //4.打开编码器
         ret = avcodec_open2(context, codec, 0);
+        AVRational tme_base = stream->time_base;
 
         if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioChannel = new AudioChannel(i, context);
+            audioChannel = new AudioChannel(i, context, tme_base);
         } else if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoChannel = new VideoChannel(i, context);
+            //帧率
+            AVRational avRational = stream->avg_frame_rate;
+            int fps = av_q2d(avRational);
+            videoChannel = new VideoChannel(i, context, tme_base, fps);
             videoChannel->callBack = this->callBack;
         }
     }
@@ -136,15 +140,16 @@ void *play(void *args) {
 void DNFFmpeg::start() {
     //正在播放的标记
     isPalying = 1;
-    if (videoChannel) {
-        LOGE("开始进行视频流的播放");
-        videoChannel->packages.setWork(1);
-        videoChannel->avFrames.setWork(1);
-        videoChannel->play();
-    }
+
 
     if (audioChannel) {
         audioChannel->play();
+    }
+
+    if (videoChannel) {
+        LOGE("开始进行视频流的播放");
+        videoChannel->setAudioChannel(audioChannel);
+        videoChannel->play();
     }
     pthread_create(&player_pid, 0, play, this);
 

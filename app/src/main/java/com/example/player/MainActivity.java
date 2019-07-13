@@ -7,6 +7,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.tencent.bugly.crashreport.CrashReport;
 
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
                 dnPlayer.start();
             }
         });
+//        VideoView videoView = findViewById(R.id.videoView);
+//        videoView.setVideoPath("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8");
+//        videoView.start();
     }
 
     /**

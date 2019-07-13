@@ -26,7 +26,9 @@ void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     }
 }
 
-AudioChannel::AudioChannel(int i, AVCodecContext *context) : BaseChannel(i, context) {
+AudioChannel::AudioChannel(int i, AVCodecContext *context, AVRational time_base) : BaseChannel(i,
+                                                                                               context,
+                                                                                               time_base) {
     out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
     out_samplesize = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
     out_sample_rate = 44100;
@@ -39,7 +41,7 @@ AudioChannel::AudioChannel(int i, AVCodecContext *context) : BaseChannel(i, cont
 
 
 AudioChannel::~AudioChannel() {
-    if(data){
+    if (data) {
         free(data);
         data = 0;
     }
@@ -75,7 +77,7 @@ void AudioChannel::decode() {
         //把包丟給解碼器
         ret = avcodec_send_packet(context, packet);
         realseAvPacket(&packet);
-        if (ret!=0) {
+        if (ret != 0) {
             break;
         }
         //代表一个图像
@@ -210,5 +212,9 @@ int AudioChannel::getPcm() {
                               frame->nb_samples);
 
     data_size = samples * out_samplesize * out_channels;
+    //获取frame的一个相对播放时间
+    //获得相对播放这一段数据的秒数
+    clock = frame->pts * av_q2d(time_base);
+
     return data_size;
 };

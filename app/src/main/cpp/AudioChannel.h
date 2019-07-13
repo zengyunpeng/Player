@@ -15,7 +15,7 @@ extern "C" {
 
 class AudioChannel : public BaseChannel {
 public:
-    AudioChannel(int i, AVCodecContext *context);
+    AudioChannel(int i, AVCodecContext *context, AVRational time_base);
 
     ~AudioChannel();
 
@@ -52,6 +52,8 @@ public:
 
     int out_sample_rate;
     uint8_t *data = 0;
+    //音频播放的相对时间
+    double clock;
 
 
 };
