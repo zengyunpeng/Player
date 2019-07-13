@@ -62,4 +62,11 @@ public class MainActivity extends AppCompatActivity {
 //        CrashReport.testJavaCrash();
         dnPlayer.prepare();
     }
+
+    public void nativeCrash(View view) {
+        doNativeCrash();
+    }
+
+    private native void doNativeCrash();
+
 }

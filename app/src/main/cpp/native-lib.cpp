@@ -79,4 +79,10 @@ Java_com_example_player_DNPlayer_native_1setSurface(JNIEnv *env, jobject instanc
     //设置窗口属性
 
     pthread_mutex_unlock(&mutex);
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_player_MainActivity_doNativeCrash(JNIEnv *env, jobject instance) {
+
+    string *s = 0;
+    s->data();
 }

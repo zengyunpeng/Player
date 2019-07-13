@@ -12,9 +12,19 @@
         android:layout_height="200dp" />
 
     <Button
+        app:layout_constraintBottom_toTopOf="@+id/nativeCrash"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="start"
         android:text="播放" />
+
+
+    <Button
+        android:id="@+id/nativeCrash"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="nativeCrash"
+        android:text="nativeCrash"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
