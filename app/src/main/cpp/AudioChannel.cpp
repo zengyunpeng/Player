@@ -217,4 +217,37 @@ int AudioChannel::getPcm() {
     clock = frame->pts * av_q2d(time_base);
 
     return data_size;
+}
+
+void AudioChannel::stop() {
+    isPlaying = 0;
+    packages.setWork(0);
+    avFrames.setWork(0);
+    pthread_join(pid_audio_decode, 0);
+    pthread_join(pid_audio_play, 0);
+    if (swrContext) {
+        swr_free(&swrContext);
+        swrContext = 0;
+    }
+    //释放播放器
+    if (bqPlayerObject) {
+        (*bqPlayerObject)->Destroy(bqPlayerObject);
+        bqPlayerObject = nullptr;
+        bqPlayerInterface = nullptr;
+        bqPlayerBufferQueueInterface = nullptr;
+    }
+    //释放混音器
+    if (outputMixObject) {
+        (*outputMixObject)->Destroy(outputMixObject);
+        outputMixObject = nullptr;
+    }
+
+    //釋放引擎
+    if (engineObject) {
+        (*engineObject)->Destroy(engineObject);
+        engineObject = nullptr;
+        engineInterface = nullptr;
+    }
+
+
 };

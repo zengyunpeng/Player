@@ -26,6 +26,11 @@ public:
     virtual ~BaseChannel() {
         packages.clear();
         avFrames.clear();
+        if (context) {
+            avcodec_close(context);
+            avcodec_free_context(&context);
+            context = 0;
+        }
 
     };
 

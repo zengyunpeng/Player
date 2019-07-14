@@ -3,13 +3,15 @@ apply plugin: 'bugly'
 bugly {
     appId = "c52db585d0"
     appKey = "dc2caefd-e63b-43c1-9f2e-5072fda93012"
+    debug = true
 }
 
 android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.player"
-        minSdkVersion 21//出现该错误的原因，是因为上面shell脚本中，指定编译的头文件与库文件的查找目录都是21，这样编译出来的依赖库只能用在minSdkVersion 21的项目中，而我的项目最低是兼容到16，那就要重新修改了16。
+        minSdkVersion 21
+//出现该错误的原因，是因为上面shell脚本中，指定编译的头文件与库文件的查找目录都是21，这样编译出来的依赖库只能用在minSdkVersion 21的项目中，而我的项目最低是兼容到16，那就要重新修改了16。
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -31,7 +33,7 @@ android {
             jniDebuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-        debug{
+        debug {
             minifyEnabled false
             jniDebuggable true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -53,6 +55,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.tencent.bugly:crashreport:latest.release' //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
+    implementation 'com.tencent.bugly:crashreport:latest.release'
+    //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
     implementation 'com.tencent.bugly:nativecrashreport:latest.release'
 }

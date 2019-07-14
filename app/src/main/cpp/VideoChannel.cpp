@@ -191,6 +191,12 @@ void VideoChannel::render() {
     }
     av_free(&dst[0]);
     realseAvFrame(&avFrame);
+
+    //循环完成也就是播放完成了,那么就释放context
+    isPlaying = 0;
+    sws_freeContext(swsContext);
+    swsContext = 0;
+
 }
 
 
@@ -201,6 +207,14 @@ VideoChannel::~VideoChannel() {
 void VideoChannel::setAudioChannel(AudioChannel *audioChannel) {
     this->audioChannel = audioChannel;
 
+}
+
+void VideoChannel::stop() {
+    isPlaying = 0;
+    packages.setWork(0);
+    packages.setWork(0);
+    pthread_join(pid_decode, 0);
+    pthread_join(pid_render, 0);
 }
 
 //公有的不需要这种方法

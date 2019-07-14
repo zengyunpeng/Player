@@ -26,14 +26,16 @@ public:
 
     void start();
 
+    void stop();
+
     void _start();
 
     void setRenderFrameCallBack(RenderFrameCallBack callBack);
 
-private:
     char *datasource = NULL;
     pthread_t pid;
     pthread_t player_pid;
+    pthread_t stop_pid;
     AVFormatContext *avFormatContext = NULL;
     JavaCallHelper *callHelper = NULL;
     //申明一个指针一定要初始化，不然会有默认值

@@ -52,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
 //        videoView.start();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dnPlayer.stop();
+    }
+
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.

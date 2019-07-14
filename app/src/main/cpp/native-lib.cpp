@@ -10,6 +10,7 @@ DNFFmpeg *dnFFmpeg = 0;
 JavaVM *javaVM = 0;
 ANativeWindow *window = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+JavaCallHelper *javaCallHelper = 0;
 
 void render(uint8_t *data, int linesize, int width, int height) {
     pthread_mutex_lock(&mutex);
@@ -52,7 +53,7 @@ JNIEXPORT void JNICALL
 Java_com_example_player_DNPlayer_native_1prepare(JNIEnv *env, jobject instance,
                                                  jstring datasource_) {
     const char *datasource = env->GetStringUTFChars(datasource_, 0);
-    JavaCallHelper *javaCallHelper = new JavaCallHelper(javaVM, env, instance);
+    javaCallHelper = new JavaCallHelper(javaVM, env, instance);
     //创建一个播放器
     dnFFmpeg = new DNFFmpeg(javaCallHelper, datasource);
     dnFFmpeg->setRenderFrameCallBack(render);
@@ -85,4 +86,27 @@ Java_com_example_player_MainActivity_doNativeCrash(JNIEnv *env, jobject instance
 
     string *s = 0;
     s->data();
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_player_DNPlayer_native_1stop(JNIEnv *env, jobject instance) {
+
+    if (dnFFmpeg) {
+        dnFFmpeg->stop();
+    }
+
+    DELETE(javaCallHelper);
+
+//    if (javaCallHelper) {
+//        delete javaCallHelper;
+//    }
+}extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_player_DNPlayer_native_1release(JNIEnv *env, jobject instance) {
+    pthread_mutex_lock(&mutex);
+    if (window) {
+        //把老的释放
+        ANativeWindow_release(window);
+        window = 0;
+    }
+    pthread_mutex_unlock(&mutex);
 }

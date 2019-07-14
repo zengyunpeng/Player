@@ -38,6 +38,9 @@ public class DNPlayer implements SurfaceHolder.Callback {
      * @param surfaceView
      */
     public void setSurfaceView(SurfaceView surfaceView) {
+        if (holder != null) {
+            holder.removeCallback(this);
+        }
         holder = surfaceView.getHolder();
         holder.addCallback(this);
     }
@@ -78,6 +81,11 @@ public class DNPlayer implements SurfaceHolder.Callback {
         }
     }
 
+    public void realse() {
+        holder.removeCallback(this);
+        native_release();
+    }
+
 
     public void setOnPreparedListener(OnPrepareListener l) {
         this.listener = l;
@@ -96,6 +104,10 @@ public class DNPlayer implements SurfaceHolder.Callback {
     native void native_prepare(String datasource);
 
     native void native_start();
+
+    native void native_stop();
+
+    native void native_release();
 
     native void native_setSurface(Surface surface);
 }
