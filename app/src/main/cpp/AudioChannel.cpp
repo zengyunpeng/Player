@@ -2,7 +2,6 @@
 // Created by Administrator on 2019/7/2.
 //
 
-#include <libavformat/avformat.h>
 #include "AudioChannel.h"
 
 void *audio_decode(void *args) {
