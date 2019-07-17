@@ -161,6 +161,8 @@ void VideoChannel::render() {
                 //比较音频与视频
                 double audioClock = audioChannel->clock;
                 //音视频相差的间隔
+                LOGE("视频时间:%f", videoClock);
+                LOGE("音频时间:%f", audioClock);
                 double diff = videoClock - audioClock;
                 if (diff > 0) {
                     LOGE("视频快了%1f", diff);
