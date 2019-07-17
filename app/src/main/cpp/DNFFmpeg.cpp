@@ -131,7 +131,7 @@ void DNFFmpeg::_prepare() {
         }
 
         //4.打开编码器
-        ret = avcodec_open2(context, codec, 0);
+//        ret = avcodec_open2(context, codec, 0);
         AVRational tme_base = stream->time_base;
 
         if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
@@ -209,11 +209,14 @@ void DNFFmpeg::_start() {
 
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(avFormatContext, packet);
+        LOGE("av_read_frame结果:%d", ret);
         if (ret == 0) {
             //stream_index这个流的一个序号
+            LOGE("audioChannel && packet->stream_index == audioChannel->id结果:%d",
+                 audioChannel && packet->stream_index == audioChannel->id);
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 //音频
-
+                LOGE("往音频包里push数据");
                 audioChannel->packages.push(packet);
 
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
@@ -223,6 +226,7 @@ void DNFFmpeg::_start() {
 
         } else if (ret == AVERROR_EOF) {
             //读取完成，但是有可能还没播放完
+            LOGE("AVERROR_EOF");
             if (audioChannel->packages.empty() && audioChannel->avFrames.empty() &&
                 videoChannel->packages.empty() && videoChannel->avFrames.empty()) {
                 break;

@@ -191,6 +191,7 @@ void VideoChannel::render() {
         callBack(dst[0], dstStride[0], context->width, context->height);
         realseAvFrame(&avFrame);
     }
+    //这一行存在崩溃的问题  TODO
     av_free(&dst[0]);
     realseAvFrame(&avFrame);
 
