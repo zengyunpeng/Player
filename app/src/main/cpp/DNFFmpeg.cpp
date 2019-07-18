@@ -197,11 +197,16 @@ void DNFFmpeg::_start() {
     while (isPalying) {
         //如果包太多了就等待,就等待防止oom
         //特别是读本地文件的时候 读取速度非常快,更要避免这个问题
+        //这里会存在packages一直大于100的情况,然后卡住所有线程
+        LOGE("audioChannel && audioChannel->packages.size() > 100: %d",
+             audioChannel && audioChannel->packages.size() > 100);
         if (audioChannel && audioChannel->packages.size() > 100) {
             //睡10毫秒
             av_usleep(1000 * 10);
             continue;
         }
+        LOGE("videoChannel && videoChannel->packages.size() > 100: %d",
+             videoChannel && videoChannel->packages.size() > 100);
         if (videoChannel && videoChannel->packages.size() > 100) {
             av_usleep(1000 * 10);
             continue;

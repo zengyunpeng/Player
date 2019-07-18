@@ -4,6 +4,7 @@
 
 #include "AudioChannel.h"
 
+//音频播放存在卡死的问题
 void *audio_decode(void *args) {
     AudioChannel *audioChannel = static_cast<AudioChannel *>(args);
     audioChannel->decode();
