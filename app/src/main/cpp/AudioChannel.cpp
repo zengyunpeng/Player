@@ -84,7 +84,7 @@ void AudioChannel::decode() {
         //-12
         //-1094995529        Invalid data found when processing input
         LOGE("音频接包结果: %d", ret);
-        LOGE("音频接包结果: %s", av_err2str(ret));
+        LOGETAG("音频接包结果: %s", av_err2str(ret));
         realseAvPacket(&packet);
         if (ret != 0) {
             break;

@@ -83,8 +83,8 @@ public:
 #else
         pthread_mutex_lock(&mutex);
         //在多核处理器下 由于竞争可能虚假唤醒 包括jdk也说明了
-        if (work && q.empty()) {
-            LOGE("進去等著了%d %d", work, q.empty());
+        while (work && q.empty()) {
+//            LOGE("進去等著了%d %d", work, q.empty());
             pthread_cond_wait(&cond, &mutex);
         }
         if (!q.empty()) {

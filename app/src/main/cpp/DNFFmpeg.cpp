@@ -184,6 +184,7 @@ void DNFFmpeg::start() {
         videoChannel->setAudioChannel(audioChannel);
         videoChannel->play();
     }
+    //读取音视频包
     pthread_create(&player_pid, 0, play, this);
 
 }
@@ -199,15 +200,17 @@ void DNFFmpeg::_start() {
         //特别是读本地文件的时候 读取速度非常快,更要避免这个问题
         //这里会存在packages一直大于100的情况,然后卡住所有线程
         LOGE("audioChannel->packages: %d", audioChannel->packages.size());
-        LOGE("audioChannel && audioChannel->packages.size() > 100: %d",
-             audioChannel && audioChannel->packages.size() > 100);
+//        LOGE("audioChannel && audioChannel->packages.size() > 100: %d",
+//             audioChannel && audioChannel->packages.size() > 100);
         if (audioChannel && audioChannel->packages.size() > 100) {
             //睡10毫秒
             av_usleep(1000 * 10);
             continue;
         }
-        LOGE("videoChannel && videoChannel->packages.size() > 100: %d",
-             videoChannel && videoChannel->packages.size() > 100);
+        LOGE("videoChannel->packages: %d", videoChannel->packages.size());
+//        LOGE("videoChannel && videoChannel->packages.size() > 100: %d",
+//             videoChannel && videoChannel->packages.size() > 100);
+        //这里会存在packages一直大于100的情况,然后卡住所有线程
         if (videoChannel && videoChannel->packages.size() > 100) {
             av_usleep(1000 * 10);
             continue;
@@ -245,7 +248,7 @@ void DNFFmpeg::_start() {
             break;
         }
     }
-
+    isPalying = 0;
     audioChannel->stop();
     videoChannel->stop();
 }
