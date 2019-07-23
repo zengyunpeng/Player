@@ -86,6 +86,8 @@ void VideoChannel::decode() {
         LOGEVideoChannel("packages.size(): %d", packages.size());
         int ret = packages.pop(avPacket);
         if (!isPlaying) {
+            LOGEVideoChannel("播放已停止break");
+
             break;
         }
         if (!ret) {
@@ -95,6 +97,7 @@ void VideoChannel::decode() {
         ret = avcodec_send_packet(context, avPacket);
         realseAvPacket(&avPacket);
         if (ret != 0) {
+            LOGEVideoChannel("解码失败break");
             break;
         }
         //代表了一个图像
@@ -104,6 +107,7 @@ void VideoChannel::decode() {
         if (ret == AVERROR(EAGAIN)) {
             continue;
         } else if (ret != 0) {
+            LOGEVideoChannel("转换为帧布失败break");
             break;
         }
 
