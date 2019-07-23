@@ -68,9 +68,9 @@ void AudioChannel::play() {
 void AudioChannel::decode() {
     AVPacket *packet = 0;
     while (isPlaying) {
-        LOGE("音频包的长度: %d", packages.size());
+//        LOGE("音频包的长度: %d", packages.size());
         int ret = packages.pop(packet);
-        LOGE("去除音频包的结果:%d ", ret);
+//        LOGE("去除音频包的结果:%d ", ret);
         if (!isPlaying) {
             return;
         }
@@ -83,8 +83,8 @@ void AudioChannel::decode() {
         //这里会有一个AVERROR_INVALIDDATA = -1094995529的错误
         //-12
         //-1094995529        Invalid data found when processing input
-        LOGE("音频接包结果: %d", ret);
-        LOGETAG("音频接包结果: %s", av_err2str(ret));
+//        LOGE("音频接包结果: %d", ret);
+//        LOGETAG("音频接包结果: %s", av_err2str(ret));
         realseAvPacket(&packet);
         if (ret != 0) {
             break;
@@ -93,7 +93,7 @@ void AudioChannel::decode() {
         AVFrame *frame = av_frame_alloc();
         //从解码器中读取 解码后的数据包 AVFrame
         ret = avcodec_receive_frame(context, frame);
-        LOGE("音频包转为帧结果: %d", ret);
+//        LOGE("音频包转为帧结果: %d", ret);
         if (ret == AVERROR(EAGAIN)) {
             //需要更多的数据才能解码
             continue;
@@ -101,7 +101,7 @@ void AudioChannel::decode() {
             break;
         }
         //新开一个线程来播放(提高流畅度)
-        LOGE("往avFrames里面添加数据");
+//        LOGE("往avFrames里面添加数据");
         avFrames.push(frame);
     }
     realseAvPacket(&packet);
@@ -199,9 +199,9 @@ void AudioChannel::_play() {
 int AudioChannel::getPcm() {
     int data_size = 0;
     AVFrame *frame;
-    LOGE("avFrames%d", avFrames.size());
+//    LOGE("avFrames%d", avFrames.size());
     int ret = avFrames.pop(frame);
-    LOGE("&frame%p", &frame);
+//    LOGE("&frame%p", &frame);
     if (!isPlaying) {
         if (ret) {
             realseAvFrame(&frame);

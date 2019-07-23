@@ -195,11 +195,17 @@ void DNFFmpeg::start() {
 void DNFFmpeg::_start() {
     //正在播放的标记
     int ret;
+    int videoTime = 0;
+    int audioTime = 0;
+
     while (isPalying) {
+        //音频包的个数大于视频包
+//        LOGETag("视频包个数: %d", videoTime);
+//        LOGETag("音频包个数: %d", audioTime);
         //如果包太多了就等待,就等待防止oom
         //特别是读本地文件的时候 读取速度非常快,更要避免这个问题
         //这里会存在packages一直大于100的情况,然后卡住所有线程
-        LOGE("audioChannel->packages: %d", audioChannel->packages.size());
+//        LOGE("audioChannel->packages: %d", audioChannel->packages.size());
 //        LOGE("audioChannel && audioChannel->packages.size() > 100: %d",
 //             audioChannel && audioChannel->packages.size() > 100);
         if (audioChannel && audioChannel->packages.size() > 100) {
@@ -207,7 +213,7 @@ void DNFFmpeg::_start() {
             av_usleep(1000 * 10);
             continue;
         }
-        LOGE("videoChannel->packages: %d", videoChannel->packages.size());
+//        LOGE("videoChannel->packages: %d", videoChannel->packages.size());
 //        LOGE("videoChannel && videoChannel->packages.size() > 100: %d",
 //             videoChannel && videoChannel->packages.size() > 100);
         //这里会存在packages一直大于100的情况,然后卡住所有线程
@@ -218,18 +224,20 @@ void DNFFmpeg::_start() {
 
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(avFormatContext, packet);
-        LOGE("av_read_frame结果:%d", ret);
+//        LOGE("av_read_frame结果:%d", ret);
         if (ret == 0) {
             //stream_index这个流的一个序号
-            LOGE("audioChannel && packet->stream_index == audioChannel->id结果:%d",
-                 audioChannel && packet->stream_index == audioChannel->id);
+//            LOGE("audioChannel && packet->stream_index == audioChannel->id结果:%d",
+//                 audioChannel && packet->stream_index == audioChannel->id);
             if (audioChannel && packet->stream_index == audioChannel->id) {
                 //音频
-                LOGE("往音频包里push数据");
+                audioTime++;
+//                LOGE("往音频包里push数据");
                 audioChannel->packages.push(packet);
 
             } else if (videoChannel && packet->stream_index == videoChannel->id) {
                 //视频
+                videoTime++;
                 videoChannel->packages.push(packet);
             }
 

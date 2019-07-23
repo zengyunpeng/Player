@@ -83,6 +83,7 @@ void VideoChannel::play() {
 void VideoChannel::decode() {
     AVPacket *avPacket = 0;
     while (isPlaying) {
+        LOGEVideoChannel("packages.size(): %d", packages.size());
         int ret = packages.pop(avPacket);
         if (!isPlaying) {
             break;
@@ -108,6 +109,7 @@ void VideoChannel::decode() {
 
         //再开一个线程去播放，这样就不会影响解码
         avFrames.push(frame);
+        LOGEVideoChannel("avFrames.size(): %d", avFrames.size());
     }
 
     //释放
@@ -161,15 +163,15 @@ void VideoChannel::render() {
                 //比较音频与视频
                 double audioClock = audioChannel->clock;
                 //音视频相差的间隔
-                LOGE("视频时间:%f", videoClock);
-                LOGE("音频时间:%f", audioClock);
+//                LOGE("视频时间:%f", videoClock);
+//                LOGE("音频时间:%f", audioClock);
                 double diff = videoClock - audioClock;
                 if (diff > 0) {
-                    LOGE("视频快了%1f", diff);
+//                    LOGE("视频快了%1f", diff);
                     //视频比较快
                     av_usleep((delays + diff) * 1000 * 1000);
                 } else if (diff < 0) {
-                    LOGE("音频快了%1f", diff);
+//                    LOGE("音频快了%1f", diff);
                     //不睡了 让视频赶上音频
                     //视频包积压的太多了 (丢包)
                     if (fabs(diff) >= 0.05) {

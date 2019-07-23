@@ -11,6 +11,8 @@
 
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,"FFMPEG",__VA_ARGS__)
 #define LOGETAG(...) __android_log_print(ANDROID_LOG_ERROR,"TAG",__VA_ARGS__)
+#define LOGETag(...) __android_log_print(ANDROID_LOG_ERROR,"tag",__VA_ARGS__)
+#define LOGEVideoChannel(...) __android_log_print(ANDROID_LOG_ERROR,"VideoChannel",__VA_ARGS__)
 
 //宏函数
 #define DELETE(obj) if(obj){ delete obj; obj = 0; }
@@ -34,7 +36,6 @@
 #define FFMPEG_OPEN_DECODER_FAIL 7
 //没有音视频
 #define FFMPEG_NOMEDIA 8
-
 
 
 #endif //DNPLAYER_MACRO_H
